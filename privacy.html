@@ -6,7 +6,7 @@
   <title>Chính sách bảo mật - YouTube Auto Subscribe Tool</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Thiết lập font chữ và hiệu ứng nền gradient cho toàn trang */
+    /* Thiết lập font chữ, hiệu ứng nền gradient cho toàn trang */
     body {
       font-family: 'Inter', sans-serif;
       line-height: 1.6;
@@ -14,64 +14,64 @@
       background-attachment: fixed;
       color: #334155;
     }
-    /* Thêm thuộc tính này để đảm bảo văn bản luôn nằm trong khung */
+    /* Đảm bảo văn bản luôn tự động xuống dòng và nằm gọn trong khung */
     .word-break-container {
       overflow-wrap: break-word;
     }
   </style>
 </head>
-<body class="p-6 md:p-12 min-h-screen flex items-center justify-center">
-  <div class="max-w-4xl w-full mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-2xl border-2 border-slate-200 transform transition-transform duration-300 hover:scale-[1.01]">
-    <!-- Tiêu đề chính -->
-    <header class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-2 tracking-tight">
-        Chính sách bảo mật
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8 md:p-12">
+  <div class="max-w-4xl w-full mx-auto bg-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-2xl border-2 border-slate-200 transform transition-transform duration-300 hover:scale-[1.01]">
+    <!-- Tiêu đề chính: Đã loại bỏ thuộc tính giữ trên một dòng để đảm bảo không bị tràn khung trên mobile -->
+    <header class="text-center mb-10 md:mb-12">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-2 tracking-tight leading-tight">
+        CHÍNH SÁCH BẢO MẬT
       </h1>
-      <p class="text-lg text-slate-600 font-medium">YouTube Auto Subscribe Tool</p>
+      <p class="text-base sm:text-lg text-slate-600 font-medium">YouTube Auto Subscribe Tool</p>
     </header>
     
-    <!-- Nội dung chính sách -->
-    <div class="space-y-8 word-break-container">
-      <section class="bg-blue-50 p-6 md:p-8 rounded-2xl border border-blue-200">
-        <h2 class="text-2xl font-bold text-blue-800 mb-2">Giới thiệu về cam kết bảo mật</h2>
-        <p class="text-slate-700">Chào mừng bạn đến với YouTube Auto Subscribe Tool. Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn một cách nghiêm ngặt. Chính sách này sẽ giải thích chi tiết cách ứng dụng hoạt động và đảm bảo mọi thông tin của bạn được an toàn tuyệt đối.</p>
+    <!-- Nội dung chính sách: Căn chỉnh lại khoảng cách để cân đối hơn trên mọi thiết bị -->
+    <div class="space-y-6 md:space-y-8 word-break-container text-left">
+      <section class="bg-blue-50 p-6 rounded-2xl border border-blue-200">
+        <h2 class="text-xl sm:text-2xl font-bold text-blue-800 mb-2">Giới thiệu về cam kết bảo mật</h2>
+        <p class="text-sm sm:text-base text-slate-700">Chào mừng bạn đến với YouTube Auto Subscribe Tool. Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn một cách nghiêm ngặt. Chính sách này sẽ giải thích chi tiết cách ứng dụng hoạt động và đảm bảo mọi thông tin của bạn được an toàn tuyệt đối.</p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-slate-800 mb-4">Cách thức ứng dụng hoạt động</h2>
-        <p class="text-slate-700">Ứng dụng "YouTube Auto Subscribe Tool" chỉ sử dụng quyền truy cập **YouTube Data API v3** để thực hiện chức năng duy nhất: giúp người dùng đăng ký kênh YouTube từ một tệp CSV cá nhân. Chúng tôi không thu thập hoặc xử lý bất kỳ dữ liệu cá nhân nào khác.</p>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">Cách thức ứng dụng hoạt động</h2>
+        <p class="text-sm sm:text-base text-slate-700">Ứng dụng "YouTube Auto Subscribe Tool" chỉ sử dụng quyền truy cập **YouTube Data API v3** để thực hiện chức năng duy nhất: giúp người dùng đăng ký kênh YouTube từ một tệp CSV cá nhân. Chúng tôi không thu thập hoặc xử lý bất kỳ dữ liệu cá nhân nào khác.</p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-slate-800 mb-4">Những cam kết rõ ràng về dữ liệu</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">Những cam kết rõ ràng về dữ liệu</h2>
         <div class="space-y-4">
           <div class="flex items-start bg-gray-50 p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 hover:shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-500 mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 sm:w-8 sm:h-8 text-blue-500 mr-3 sm:mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
             <div>
-              <p class="font-bold text-lg text-blue-800">Không lưu trữ trên máy chủ</p>
-              <p class="text-slate-700">Dữ liệu OAuth token chỉ được giữ tạm thời trong trình duyệt của bạn và **không bao giờ được gửi về máy chủ** của chúng tôi. Chúng tôi không thể truy cập token này.</p>
+              <p class="font-bold text-base sm:text-lg text-blue-800">Không lưu trữ trên máy chủ</p>
+              <p class="text-sm sm:text-base text-slate-700">Dữ liệu OAuth token chỉ được giữ tạm thời trong trình duyệt của bạn và **không bao giờ được gửi về máy chủ** của chúng tôi. Chúng tôi không thể truy cập token này.</p>
             </div>
           </div>
           <div class="flex items-start bg-gray-50 p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 hover:shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-500 mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 sm:w-8 sm:h-8 text-red-500 mr-3 sm:mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M15 9l-6 6M9 9l6 6"></path>
             </svg>
             <div>
-              <p class="font-bold text-lg text-red-800">Không thu thập thông tin nhạy cảm</p>
-              <p class="text-slate-700">Ứng dụng không thu thập email, mật khẩu hay bất kỳ thông tin nhạy cảm nào khác của bạn. Sự riêng tư của bạn là ưu tiên hàng đầu.</p>
+              <p class="font-bold text-base sm:text-lg text-red-800">Không thu thập thông tin nhạy cảm</p>
+              <p class="text-sm sm:text-base text-slate-700">Ứng dụng không thu thập email, mật khẩu hay bất kỳ thông tin nhạy cảm nào khác của bạn. Sự riêng tư của bạn là ưu tiên hàng đầu.</p>
             </div>
           </div>
           <div class="flex items-start bg-gray-50 p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 hover:shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-500 mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 sm:w-8 sm:h-8 text-green-500 mr-3 sm:mr-4 mt-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-8.8"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
             <div>
-              <p class="font-bold text-lg text-green-800">Bạn có toàn quyền kiểm soát</p>
-              <p class="text-slate-700">Bạn có thể tự xóa quyền truy cập của ứng dụng bất kỳ lúc nào tại trang <a href="https://myaccount.google.com/permissions" class="text-blue-600 hover:underline font-bold" target="_blank" rel="noopener noreferrer">Google Account Permissions</a>.</p>
+              <p class="font-bold text-base sm:text-lg text-green-800">Bạn có toàn quyền kiểm soát</p>
+              <p class="text-sm sm:text-base text-slate-700">Bạn có thể tự xóa quyền truy cập của ứng dụng bất kỳ lúc nào tại trang <a href="https://myaccount.google.com/permissions" class="text-blue-600 hover:underline font-bold" target="_blank" rel="noopener noreferrer">Google Account Permissions</a>.</p>
             </div>
           </div>
         </div>
@@ -79,10 +79,10 @@
 
       <!-- Phần liên hệ -->
       <section class="bg-indigo-50 p-6 md:p-8 rounded-2xl border border-indigo-200 text-center">
-        <h2 class="text-2xl font-bold text-indigo-800 mb-4">Thông tin liên hệ</h2>
-        <p class="text-slate-700">Nếu bạn có bất kỳ thắc mắc nào về chính sách bảo mật này, vui lòng liên hệ với chúng tôi qua email:</p>
+        <h2 class="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">Thông tin liên hệ</h2>
+        <p class="text-sm sm:text-base text-slate-700">Nếu bạn có bất kỳ thắc mắc nào về chính sách bảo mật này, vui lòng liên hệ với chúng tôi qua email:</p>
         <div class="mt-4">
-          <a href="mailto:your.email@gmail.com" class="font-bold text-xl text-indigo-600 hover:underline">
+          <a href="mailto:your.email@gmail.com" class="font-bold text-lg sm:text-xl text-indigo-600 hover:underline">
             tinphat.mmo@gmail.com
           </a>
         </div>
