@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Công Cụ Đăng Ký Kênh YouTube</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    .container { max-width: 600px; margin: 2rem auto; padding: 1.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,.1); }
+    .file-input-container { border: 2px dashed #d1d5db; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: background-color .3s; }
+    .file-input-container:hover { background-color: #e5e7eb; }
+    .badge { font-size: 12px; padding: 2px 8px; border-radius: 9999px; background: #eef2ff; color: #4338ca; }
+  </style>
+  <!-- Google Identity Services (OAuth) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+  <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Công Cụ Đăng Ký Kênh</h1>
+    <p class="text-center text-gray-500 mb-6">Tải lên tệp <strong>subscriptions.csv</strong> từ Google Takeout.</p>
+
+    <!-- Khu vực upload CSV -->
+    <div id="file-input-area" class="file-input-container">
+      <input type="file" id="file-input" class="hidden" accept=".csv" />
+      <p id="file-text" class="text-gray-600">
+        <span class="font-semibold text-blue-600">Nhấn để chọn tệp</span> hoặc kéo & thả tệp vào đây.
+      </p>
+    </div>
+
+    <!-- Hàng nút thao tác chính -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <button id="login-button" class="px-4 py-3 bg-blue-600 text-white font-semibold rounded-full shadow hover:bg-blue-700 transition">Đăng nhập YouTube</button>
+      <button id="open-selected-button" class="px-4 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow hover:bg-emerald-700 transition">Mở Kênh Đã Chọn</button>
+      <button id="subscribe-selected-button" class="px-4 py-3 bg-pink-600 text-white font-semibold rounded-full shadow hover:bg-pink-700 transition disabled:opacity-50" disabled>Đăng ký kênh (API)</button>
+    </div>
+
+    <!-- Trạng thái & lỗi -->
+    <div id="auth-status" class="mt-3 text-center text-sm text-gray-600"></div>
+    <div id="error-message" class="text-center text-red-500 mt-3 hidden"></div>
+
+    <!-- Danh sách kênh -->
+    <div id="channel-list-container" class="mt-8 hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+        <h2 class="text-2xl font-bold text-gray-800">Danh sách Kênh</h2>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="select-all-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+          <label for="select-all-checkbox" class="text-sm font-medium text-gray-700 select-none">Chọn tất cả</label>
+        </div>
+      </div>
+      <div id="loading-spinner" class="text-center hidden">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+        <p class="mt-2 text-gray-600">Đang tải danh sách kênh...</p>
+      </div>
+      <div id="channel-list" class="space-y-4"></div>
+      <div id="progress" class="mt-4 text-sm text-gray-600"></div>
+    </div>
+  </div>
+
+  <script>
+    // ========= DOM refs =========
+    const fileInput = document.getElementById('file-input');
+    const fileInputArea = document.getElementById('file-input-area');
+    const fileText = document.getElementById('file-text');
+    const channelListContainer = document.getElementById('channel-list-container');
+    const channelList = document.getElementById('channel-list');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const errorMessage = document.getElementById('error-message');
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    const openSelectedButton = document.getElementById('open-selected-button');
+    const subscribeSelectedButton = document.getElementById('subscribe-selected-button');
+    const loginButton = document.getElementById('login-button');
+    const authStatus = document.getElementById('auth-status');
+    const progress = document.getElementById('progress');
+
+    // ========= State =========
+    let accessToken = null;
+    let tokenClient = null;
+    let channelsCache = []; // {url, title}
+
+    // ========= OAuth (GIS) =========
+    window.onload = () => {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com', // TODO: thay bằng Client ID của anh
+        scope: 'https://www.googleapis.com/auth/youtube',
+        prompt: '', // lần đầu vẫn hiện consent
+        callback: (resp) => {
+          if (resp && resp.access_token) {
+            accessToken = resp.access_token;
+            authStatus.innerHTML = '<span class="badge">Đã đăng nhập YouTube</span>';
+            subscribeSelectedButton.disabled = false;
+          } else {
+            authStatus.textContent = 'Không lấy được token. Thử lại.';
+          }
+        }
+      });
+    };
+
+    function requestToken() {
+      tokenClient.requestAccessToken();
+    }
+
+    loginButton.addEventListener('click', () => requestToken());
+
+    // ========= File input events =========
+    fileInputArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) { fileText.textContent = file.name; processFile(file); }
+    });
+    fileInputArea.addEventListener('dragover', (e) => { e.preventDefault(); fileInputArea.classList.add('border-blue-500'); });
+    fileInputArea.addEventListener('dragleave', (e) => { e.preventDefault(); fileInputArea.classList.remove('border-blue-500'); });
+    fileInputArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileInputArea.classList.remove('border-blue-500');
+      const file = e.dataTransfer.files[0];
+      if (file) { fileText.textContent = file.name; processFile(file); }
+    });
+
+    // ========= Select all =========
+    selectAllCheckbox.addEventListener('change', (event) => {
+      const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]');
+      checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
+    });
+
+    // ========= Open selected (UI route) =========
+    openSelectedButton.addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]:checked');
+      if (checkboxes.length === 0) return showError('Vui lòng chọn ít nhất một kênh để mở.');
+      checkboxes.forEach(checkbox => {
+        const raw = checkbox.dataset.url;
+        if (raw) {
+          const u = buildSubscribeUrl(raw);
+          window.open(u, '_blank', 'noopener');
+        }
+      });
+    });
+
+    // ========= Subscribe selected (API route) =========
+    subscribeSelectedButton.addEventListener('click', async () => {
+      errorMessage.classList.add('hidden');
+      progress.textContent = '';
+      if (!accessToken) return showError('Vui lòng bấm “Đăng nhập YouTube” trước.');
+
+      const checks = Array.from(document.querySelectorAll('#channel-list input[type="checkbox"]:checked'));
+      if (checks.length === 0) return showError('Vui lòng chọn ít nhất một kênh để đăng ký.');
+
+      // Tạo hàng tác vụ tuần tự để dễ kiểm soát quota + thông báo
+      let okCount = 0, failCount = 0;
+      for (let i = 0; i < checks.length; i++) {
+        const { url, title } = JSON.parse(checks[i].dataset.payload);
+        progress.textContent = `(${i+1}/${checks.length}) Đang xử lý: ${title}…`;
+        try {
+          const channelId = await resolveChannelId(url, title);
+          if (!channelId) throw new Error('Không tìm được channelId');
+          await subscribeChannel(channelId);
+          okCount++;
+        } catch (err) {
+          console.error('Subscribe failed for', title, err);
+          failCount++;
+        }
+      }
+      progress.textContent = `Hoàn tất: ${okCount} thành công, ${failCount} thất bại.`;
+      if (failCount > 0) showError('Một số kênh đăng ký thất bại. Xem console để biết chi tiết.');
+    });
+
+    // ========= Core functions =========
+    function processFile(file) {
+      errorMessage.classList.add('hidden');
+      channelListContainer.classList.add('hidden');
+      loadingSpinner.classList.remove('hidden');
+      channelList.innerHTML = '';
+      selectAllCheckbox.checked = false;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const channels = parseCSV(text); // [{url,title}]
+        channelsCache = channels;
+        if (channels.length > 0) {
+          loadingSpinner.classList.add('hidden');
+          channelListContainer.classList.remove('hidden');
+          displayChannels(channels);
+        } else {
+          loadingSpinner.classList.add('hidden');
+          showError('Không tìm thấy kênh trong CSV. Hãy kiểm tra cột URL và Tên kênh.');
+        }
+      };
+      reader.onerror = () => {
+        loadingSpinner.classList.add('hidden');
+        showError('Lỗi khi đọc tệp. Vui lòng thử lại.');
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCSV(text) {
+      const lines = text.split('\n');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+      // Tự dò cột URL / Title (giống file gốc) 
+      let urlIndex = -1, titleIndex = -1;
+      headers.forEach((h, i) => {
+        const lower = h.toLowerCase();
+        if (urlIndex === -1 && (lower.includes('url') || lower.includes('link') || lower.includes('address'))) urlIndex = i;
+        if (titleIndex === -1 && (lower.includes('title') || lower.includes('name') || lower.includes('kênh'))) titleIndex = i;
+      });
+
+      if (urlIndex === -1 || titleIndex === -1) return [];
+
+      const arr = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line || !line.trim()) continue;
+        const parts = splitCSVLine(line);
+        if (parts.length > Math.max(urlIndex, titleIndex)) {
+          const url = (parts[urlIndex] || '').trim().replace(/"/g, '');
+          const title = (parts[titleIndex] || '').trim().replace(/"/g, '');
+          if (url && title) arr.push({ url, title });
+        }
+      }
+      return arr;
+    }
+
+    function splitCSVLine(line) {
+      const parts = [];
+      let inQuote = false, cur = '';
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') inQuote = !inQuote;
+        else if (c === ',' && !inQuote) { parts.push(cur); cur = ''; }
+        else cur += c;
+      }
+      parts.push(cur);
+      return parts;
+    }
+
+    function displayChannels(channels) {
+      channelList.innerHTML = '';
+      channels.forEach(ch => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'mr-3 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded';
+        checkbox.dataset.url = ch.url;
+        checkbox.dataset.payload = JSON.stringify(ch);
+        row.appendChild(checkbox);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'flex flex-col flex-1';
+
+        const t = document.createElement('div');
+        t.className = 'text-gray-800 font-medium truncate';
+        t.textContent = ch.title;
+
+        const u = document.createElement('a');
+        u.className = 'text-xs text-blue-600 hover:underline break-all';
+        u.href = ch.url; u.target = '_blank'; u.rel = 'noopener';
+        u.textContent = ch.url;
+
+        wrap.appendChild(t);
+        wrap.appendChild(u);
+        row.appendChild(wrap);
+        channelList.appendChild(row);
+      });
+    }
+
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.classList.remove('hidden');
+    }
+
+    // Build URL mở tab với popup confirm (nếu phù hợp)
+    function buildSubscribeUrl(raw) {
+      try {
+        const u = new URL(raw);
+        if (u.hostname === 'm.youtube.com' || u.hostname === 'youtube.com') u.hostname = 'www.youtube.com';
+        if (!u.searchParams.has('sub_confirmation')) u.searchParams.set('sub_confirmation', '1');
+        u.searchParams.set('app', 'desktop');
+        u.searchParams.set('persist_app', '1');
+        return u.toString();
+      } catch {
+        const sep = raw.includes('?') ? '&' : '?';
+        return `${raw}${sep}sub_confirmation=1&app=desktop&persist_app=1`;
+      }
+    }
+
+    // ========= YouTube API helpers =========
+    async function resolveChannelId(url, titleFallback='') {
+      // 1) Nếu là /channel/UC.... => lấy luôn
+      const extracted = extractUC(url);
+      if (extracted) return extracted;
+
+      // 2) Nếu là /@handle => dùng channels.list?forHandle=@...
+      const handle = extractHandle(url);
+      if (handle) {
+        const data = await ytGET(`https://youtube.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handle)}`);
+        return data?.items?.[0]?.id || null;
+      }
+
+      // 3) /user/username => thử forUsername (vẫn hoạt động cho một số kênh cũ)
+      const username = extractUserName(url);
+      if (username) {
+        const data = await ytGET(`https://youtube.googleapis.com/youtube/v3/channels?part=id&forUsername=${encodeURIComponent(username)}`);
+        if (data?.items?.[0]?.id) return data.items[0].id;
+      }
+
+      // 4) /c/custom-name hoặc không rõ → fallback: search theo title (type=channel)
+      if (titleFallback) {
+        const data = await ytGET(`https://youtube.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(titleFallback)}`);
+        return data?.items?.[0]?.snippet?.channelId || null;
+      }
+
+      return null;
+    }
+
+    function extractUC(raw) {
+      try {
+        const u = new URL(raw);
+        const m = u.pathname.match(/\/channel\/(UC[0-9A-Za-z_-]{21,})/);
+        return m ? m[1] : null;
+      } catch { return null; }
+    }
+
+    function extractHandle(raw) {
+      try {
+        const u = new URL(raw);
+        const m = u.pathname.match(/^\/@([A-Za-z0-9._-]+)/);
+        return m ? '@' + m[1] : null;
+      } catch { return null; }
+    }
+
+    function extractUserName(raw) {
+      try {
+        const u = new URL(raw);
+        const m = u.pathname.match(/^\/user\/([A-Za-z0-9._-]+)/);
+        return m ? m[1] : null;
+      } catch { return null; }
+    }
+
+    async function ytGET(url) {
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (!res.ok) throw new Error(`YouTube GET failed ${res.status}`);
+      return res.json();
+    }
+
+    async function subscribeChannel(channelId) {
+      const res = await fetch('https://youtube.googleapis.com/youtube/v3/subscriptions?part=snippet', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          snippet: {
+            resourceId: { kind: 'youtube#channel', channelId }
+          }
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(()=>null);
+        throw new Error(err?.error?.message || `Subscribe failed ${res.status}`);
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>
