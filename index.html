@@ -3,59 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Youtube Auto Sub</title>
+  <title>YouTube Auto Sub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-    .container { max-width: 600px; margin: 2rem auto; padding: 1.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,.1); }
-    .file-input-container { border: 2px dashed #d1d5db; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: background-color .3s; }
-    .file-input-container:hover { background-color: #e5e7eb; }
-    .badge { font-size: 12px; padding: 2px 8px; border-radius: 9999px; background: #eef2ff; color: #4338ca; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #eef2ff, #c3dafe);
+      background-attachment: fixed;
+    }
+    .custom-shadow {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
   </style>
   <!-- Google Identity Services (OAuth) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-  <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Youtube Auto Sub</h1>
-    <p class="text-center text-gray-500 mb-6">Tải lên tệp <strong>subscriptions.csv</strong> từ Google Takeout.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-8">
+  <div class="max-w-xl w-full mx-auto bg-white rounded-3xl p-6 sm:p-10 custom-shadow transform transition-transform duration-300 hover:scale-[1.01]">
+    
+    <!-- Header Section -->
+    <header class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">
+        YouTube Auto Sub
+      </h1>
+      <p class="text-base sm:text-lg text-gray-500">Tải lên tệp <strong>subscriptions.csv</strong> từ Google Takeout.</p>
+    </header>
 
-    <!-- Khu vực upload CSV -->
-    <div id="file-input-area" class="file-input-container">
+    <!-- File Upload Area -->
+    <div id="file-input-area" class="border-2 border-dashed border-blue-300 rounded-xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50">
       <input type="file" id="file-input" class="hidden" accept=".csv" />
-      <p id="file-text" class="text-gray-600">
-        <span class="font-semibold text-blue-600">Nhấn để chọn tệp</span> hoặc kéo & thả tệp vào đây.
+      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-blue-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8"></path>
+      </svg>
+      <p id="file-text" class="text-gray-600 font-medium">
+        <span class="text-blue-600 font-bold">Nhấn để chọn tệp</span> hoặc kéo & thả
       </p>
     </div>
 
-    <!-- Hàng nút thao tác chính -->
-    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <button id="login-button" class="px-4 py-3 bg-blue-600 text-white font-semibold rounded-full shadow hover:bg-blue-700 transition">Đăng nhập YouTube</button>
-      <button id="open-selected-button" class="px-4 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow hover:bg-emerald-700 transition">Mở Kênh Đã Chọn</button>
-      <button id="subscribe-selected-button" class="px-4 py-3 bg-pink-600 text-white font-semibold rounded-full shadow hover:bg-pink-700 transition disabled:opacity-50" disabled>Đăng ký kênh</button>
+    <!-- Action Buttons -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <button id="login-button" class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Đăng nhập YouTube</button>
+      <button id="open-selected-button" class="px-5 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-700 transition transform hover:scale-105">Mở Kênh Đã Chọn</button>
+      <button id="subscribe-selected-button" class="px-5 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-md hover:bg-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Đăng ký kênh</button>
     </div>
 
-    <!-- Trạng thái & lỗi -->
-    <div id="auth-status" class="mt-3 text-center text-sm text-gray-600"></div>
-    <div id="error-message" class="text-center text-red-500 mt-3 hidden"></div>
+    <!-- Status & Error Messages -->
+    <div id="auth-status" class="mt-4 text-center text-sm text-gray-600 font-medium"></div>
+    <div id="error-message" class="text-center text-red-500 mt-4 font-medium hidden"></div>
 
-    <!-- Danh sách kênh -->
+    <!-- Channel List & Progress -->
     <div id="channel-list-container" class="mt-8 hidden">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
         <h2 class="text-2xl font-bold text-gray-800">Danh sách Kênh</h2>
         <div class="flex items-center space-x-2">
           <input type="checkbox" id="select-all-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-          <label for="select-all-checkbox" class="text-sm font-medium text-gray-700 select-none">Chọn tất cả</label>
+          <label for="select-all-checkbox" class="text-sm font-medium text-gray-700 select-none cursor-pointer">Chọn tất cả</label>
         </div>
       </div>
       <div id="loading-spinner" class="text-center hidden">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
         <p class="mt-2 text-gray-600">Đang tải danh sách kênh...</p>
       </div>
-      <div id="channel-list" class="space-y-4"></div>
+      <div id="channel-list" class="space-y-3"></div>
       <div id="progress" class="mt-4 text-sm text-gray-600"></div>
     </div>
+
+    <!-- Privacy Policy Link -->
+    <div class="mt-10 text-center">
+        <a href="https://youtubeautosub.netlify.app/privacy.html" class="text-sm text-gray-500 hover:text-gray-700 hover:underline transition">Chính sách bảo mật</a>
+    </div>
+
   </div>
 
   <script>
@@ -88,7 +106,7 @@
         callback: (resp) => {
           if (resp && resp.access_token) {
             accessToken = resp.access_token;
-            authStatus.innerHTML = '<span class="badge">Đã đăng nhập YouTube</span>';
+            authStatus.innerHTML = '<span class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full animate-pulse">Đã đăng nhập thành công!</span>';
             subscribeSelectedButton.disabled = false;
           } else {
             authStatus.textContent = 'Không lấy được token. Thử lại.';
@@ -150,7 +168,7 @@
       let okCount = 0, failCount = 0;
       for (let i = 0; i < checks.length; i++) {
         const { url, title } = JSON.parse(checks[i].dataset.payload);
-        progress.textContent = `(${i+1}/${checks.length}) Đang xử lý: ${title}…`;
+        progress.textContent = `(${i+1}/${checks.length}) Đang xử lý: ${title}...`;
         try {
           const channelId = await resolveChannelId(url, title);
           if (!channelId) throw new Error('Không tìm được channelId');
@@ -240,7 +258,7 @@
       channelList.innerHTML = '';
       channels.forEach(ch => {
         const row = document.createElement('div');
-        row.className = 'flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm';
+        row.className = 'flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:bg-gray-100';
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
