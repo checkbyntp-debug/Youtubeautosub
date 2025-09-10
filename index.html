@@ -11,6 +11,7 @@
       font-family: 'Inter', sans-serif;
       background: linear-gradient(to bottom right, #eef2ff, #c3dafe);
       background-attachment: fixed;
+      overflow-x: hidden;
     }
     .custom-shadow {
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -20,8 +21,29 @@
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
     }
-    #help-modal .modal-content {
+    #help-modal .modal-content, #welcome-modal .modal-content {
       animation: fadeIn 0.3s cubic-bezier(0.2, 0, 0, 1);
+    }
+    /* Preloader animation */
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+    #preloader {
+      animation: fadeOut 0.5s ease-out 1.5s forwards;
+    }
+    .loader {
+      border-top-color: #3498db;
+      -webkit-animation: spinner 1.5s linear infinite;
+      animation: spinner 1.5s linear infinite;
+    }
+    @-webkit-keyframes spinner {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
   <!-- Google Identity Services (OAuth) -->
@@ -29,48 +51,67 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-8 relative">
 
+  <!-- Preloader -->
+  <div id="preloader" class="fixed inset-0 bg-blue-50 bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-[9999]">
+    <div class="loader ease-linear rounded-full border-8 border-t-8 border-blue-200 h-24 w-24"></div>
+  </div>
+
+  <!-- Welcome Modal -->
+  <div id="welcome-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+    <div class="modal-content bg-white rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-8 relative custom-shadow flex flex-col items-center text-center">
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Chào mừng đến với tool!</h2>
+      <div class="text-center mb-6">
+        <img id="welcome-image" src="https://placehold.co/400x200/eef2ff/4338ca?text=Welcome" alt="Welcome Image" class="rounded-lg shadow-md mb-4">
+        <p class="text-gray-700">Hãy cùng tự động hóa việc đăng ký kênh YouTube của bạn một cách nhanh chóng và dễ dàng nhé.</p>
+      </div>
+      <div class="mt-auto">
+        <button id="close-welcome-modal" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Bắt đầu ngay</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Help Button -->
-  <button id="help-button" class="fixed top-4 left-4 sm:top-8 sm:left-8 w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-lg z-50 transition-all duration-300 hover:scale-110 hover:bg-blue-700">
+  <button id="help-button" class="fixed top-4 left-4 sm:top-8 sm:left-8 w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-lg z-40 transition-all duration-300 hover:scale-110 hover:bg-blue-700">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
       <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
     </svg>
   </button>
 
   <!-- Help Modal -->
-  <div id="help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
-    <div class="modal-content bg-white rounded-3xl w-full max-w-xs sm:max-w-md p-4 sm:p-6 relative custom-shadow">
+  <div id="help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+    <div class="modal-content bg-white rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-8 relative custom-shadow">
       
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 sm:mb-6">Hướng dẫn sử dụng</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Hướng dẫn sử dụng</h2>
       
-      <ol class="space-y-4 text-sm sm:text-base text-gray-700">
+      <ol class="space-y-6 sm:space-y-8 text-base text-gray-700">
         <!-- Step 1 -->
-        <li class="flex items-start space-x-3">
-          <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-full font-bold">1</div>
+        <li class="flex items-start space-x-4">
+          <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-full font-bold text-lg">1</div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-gray-800">Lấy tệp subscriptions.csv</h3>
-            <p class="mt-1">Truy cập tài khoản YouTube cũ và tải xuống tệp danh sách các kênh đã đăng ký. <a href="https://voz.ee/s/eEynG5kll" class="text-blue-600 hover:underline font-semibold" id="get-file-link">Lấy tệp CSV tại đây.</a></p>
+            <h3 class="text-xl font-semibold text-gray-800">Lấy tệp subscriptions.csv</h3>
+            <p class="mt-1">Truy cập tài khoản YouTube cũ của bạn và tải xuống tệp chứa danh sách các kênh đã đăng ký. <a href="#" class="text-blue-600 hover:underline font-semibold" id="get-file-link">Lấy tệp CSV tại đây.</a></p>
           </div>
         </li>
         <!-- Step 2 -->
-        <li class="flex items-start space-x-3">
-          <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full font-bold">2</div>
+        <li class="flex items-start space-x-4">
+          <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full font-bold text-lg">2</div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-gray-800">Đăng nhập tài khoản mới</h3>
-            <p class="mt-1">Nhấn nút <b>Đăng nhập YouTube</b> trên website. Nếu gặp cảnh báo, vui lòng làm theo hướng dẫn <a href="https://voz.ee/s/9sGsujpt1" class="text-blue-600 hover:underline font-semibold" id="handle-warning-link">tại đây.</a></p>
+            <h3 class="text-xl font-semibold text-gray-800">Đăng nhập tài khoản YouTube mới</h3>
+            <p class="mt-1">Nhấn nút **"Đăng nhập YouTube"** trên website để kết nối. Nếu gặp cảnh báo, vui lòng làm theo hướng dẫn <a href="#" class="text-blue-600 hover:underline font-semibold" id="handle-warning-link">tại đây.</a></p>
           </div>
         </li>
         <!-- Step 3 -->
-        <li class="flex items-start space-x-3">
-          <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-pink-100 text-pink-600 rounded-full font-bold">3</div>
+        <li class="flex items-start space-x-4">
+          <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-pink-100 text-pink-600 rounded-full font-bold text-lg">3</div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-gray-800">Tải lên tệp và chạy</h3>
-            <p class="mt-1">Tải tệp CSV đã lấy lên website, sau đó nhấn <b>Chọn tất cả</b> rồi <b>Đăng ký kênh</b>.</p>
-            <p class="mt-1 italic text-xs text-gray-500">Ghi chú: Bạn có thể bỏ chọn các kênh không muốn đăng ký.</p>
+            <h3 class="text-xl font-semibold text-gray-800">Tải lên tệp và bắt đầu</h3>
+            <p class="mt-1">Tải tệp CSV đã lấy lên website, sau đó nhấn **"Chọn tất cả"** rồi **"Đăng ký kênh"**. Công cụ sẽ tự động chạy.</p>
+            <p class="mt-1 italic text-sm text-gray-500">Ghi chú: Bạn có thể bỏ chọn các kênh không muốn đăng ký.</p>
           </div>
         </li>
       </ol>
-      <div class="mt-6 text-center">
-          <button id="close-modal-button" class="px-5 py-2 bg-gray-200 text-gray-700 font-semibold rounded-full shadow-md hover:bg-gray-300 transition transform hover:scale-105">Đóng</button>
+      <div class="mt-8 text-center">
+          <button id="close-modal-button" class="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-full shadow-md hover:bg-gray-300 transition transform hover:scale-105">Đóng</button>
       </div>
     </div>
   </div>
@@ -152,7 +193,14 @@
     const closeModalButton = document.getElementById('close-modal-button');
     const getFileLink = document.getElementById('get-file-link');
     const handleWarningLink = document.getElementById('handle-warning-link');
+    const welcomeModal = document.getElementById('welcome-modal');
+    const closeWelcomeModalButton = document.getElementById('close-welcome-modal');
 
+
+    // Add event listeners for the welcome modal
+    closeWelcomeModalButton.addEventListener('click', () => {
+      welcomeModal.classList.add('hidden');
+    });
 
     // Add event listeners for the help modal
     helpButton.addEventListener('click', () => {
@@ -166,13 +214,13 @@
     // You can replace '#' with actual URLs here
     getFileLink.addEventListener('click', (e) => {
         e.preventDefault();
-        window.open('https://voz.ee/s/eEynG5kll', '_blank');
+        window.open('https://takeout.google.com/takeout/custom/youtube', '_blank');
     });
 
     handleWarningLink.addEventListener('click', (e) => {
         e.preventDefault();
         // Here you would add the link to your specific warning guide
-        window.open('https://voz.ee/s/9sGsujpt1', '_blank');
+        window.open('https://www.youtube.com/watch?v=your-guide-video', '_blank');
     });
 
     // ========= State =========
@@ -182,6 +230,13 @@
 
     // ========= OAuth (GIS) =========
     window.onload = () => {
+      // Hide preloader and show welcome modal after a delay
+      const preloader = document.getElementById('preloader');
+      setTimeout(() => {
+          preloader.style.display = 'none';
+          welcomeModal.classList.remove('hidden');
+      }, 2000); // Wait for 2 seconds before fading out preloader
+
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '664290716183-7frfubmiov6gcv811nhsmduqiko21bds.apps.googleusercontent.com', // TODO: thay bằng Client ID của anh
         scope: 'https://www.googleapis.com/auth/youtube',
