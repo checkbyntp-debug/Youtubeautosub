@@ -59,10 +59,10 @@
   <!-- Welcome Modal -->
   <div id="welcome-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
     <div class="modal-content bg-white rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-8 relative custom-shadow flex flex-col items-center text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Chào mừng đến với tool!</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Chào mừng bạn!</h2>
       <div class="text-center mb-6">
         <img id="welcome-image" src="https://placehold.co/400x200/eef2ff/4338ca?text=Welcome" alt="Welcome Image" class="rounded-lg shadow-md mb-4">
-        <p class="text-gray-700">Hãy cùng tự động hóa việc đăng ký kênh YouTube của bạn một cách nhanh chóng và dễ dàng nhé.</p>
+        <p class="text-gray-700">Xem hướng dẫn ở icon góc trái nhé. Muốn mua <b>Youtube Premium</b> giá ưu đãi liên hệ <a href="https://www.zalo.me/nguyentinphat" class="text-blue-600 hover:underline font-semibold" >tại đây.</a></p>
       </div>
       <div class="mt-auto">
         <button id="close-welcome-modal" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Bắt đầu ngay</button>
@@ -79,7 +79,7 @@
 
   <!-- Help Modal -->
   <div id="help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
-    <div class="modal-content bg-white rounded-3xl w-full max-w-[320px] sm:max-w-md p-4 sm:p-6 relative custom-shadow">
+    <div class="modal-content bg-white rounded-3xl w-full max-w-xs sm:max-w-md p-4 sm:p-6 relative custom-shadow">
       
       <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Hướng dẫn sử dụng</h2>
       
@@ -89,7 +89,7 @@
           <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-full font-bold">1</div>
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-gray-800">Lấy tệp subscriptions.csv</h3>
-            <p class="mt-1">Truy cập tài khoản YouTube cũ của bạn và tải xuống tệp chứa danh sách các kênh đã đăng ký. <a href="#" class="text-blue-600 hover:underline font-semibold" id="get-file-link">Lấy tệp CSV tại đây.</a></p>
+            <p class="mt-1">Truy cập tài khoản YouTube cũ của bạn và tải xuống tệp chứa danh sách các kênh đã đăng ký. <a href="https://voz.ee/s/eEynG5kll" class="text-blue-600 hover:underline font-semibold" id="get-file-link">Lấy tệp CSV tại đây.</a></p>
           </div>
         </li>
         <!-- Step 2 -->
@@ -97,7 +97,7 @@
           <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full font-bold">2</div>
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-gray-800">Đăng nhập tài khoản YouTube mới</h3>
-            <p class="mt-1">Nhấn nút **"Đăng nhập YouTube"** trên website để kết nối. Nếu gặp cảnh báo, vui lòng làm theo hướng dẫn <a href="#" class="text-blue-600 hover:underline font-semibold" id="handle-warning-link">tại đây.</a></p>
+            <p class="mt-1">Nhấn nút <b>Đăng nhập YouTube</b> trên website để kết nối. Nếu gặp cảnh báo, vui lòng làm theo hướng dẫn <a href="https://voz.ee/s/9sGsujpt1" class="text-blue-600 hover:underline font-semibold" id="handle-warning-link">tại đây.</a></p>
           </div>
         </li>
         <!-- Step 3 -->
@@ -105,7 +105,7 @@
           <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-pink-100 text-pink-600 rounded-full font-bold">3</div>
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-gray-800">Tải lên tệp và bắt đầu</h3>
-            <p class="mt-1">Tải tệp CSV đã lấy lên website, sau đó nhấn **"Chọn tất cả"** rồi **"Đăng ký kênh"**. Công cụ sẽ tự động chạy.</p>
+            <p class="mt-1">Tải tệp CSV đã lấy lên website, sau đó nhấn <b>Chọn tất cả</b> rồi <b>Đăng ký kênh</b>. Công cụ sẽ tự động chạy.</p>
             <p class="mt-1 italic text-xs text-gray-500">Ghi chú: Bạn có thể bỏ chọn các kênh không muốn đăng ký.</p>
           </div>
         </li>
@@ -168,7 +168,7 @@
 
     <!-- Privacy Policy Link -->
     <div class="mt-10 text-center">
-        <a href="https://youtubeautosub.netlify.app/privacy.html" class="text-sm text-gray-500 hover:text-gray-700 hover:underline transition">Chính sách bảo mật</a>
+        <a href="https://tinphat.site/privacy.html" class="text-sm text-gray-500 hover:text-gray-700 hover:underline transition">Chính sách bảo mật</a>
     </div>
 
   </div>
@@ -214,13 +214,13 @@
     // You can replace '#' with actual URLs here
     getFileLink.addEventListener('click', (e) => {
         e.preventDefault();
-        window.open('https://takeout.google.com/takeout/custom/youtube', '_blank');
+        window.open('https://voz.ee/s/eEynG5kll', '_blank');
     });
 
     handleWarningLink.addEventListener('click', (e) => {
         e.preventDefault();
         // Here you would add the link to your specific warning guide
-        window.open('https://www.youtube.com/watch?v=your-guide-video', '_blank');
+        window.open('https://voz.ee/s/9sGsujpt1', '_blank');
     });
 
     // ========= State =========
