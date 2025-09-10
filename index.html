@@ -268,14 +268,14 @@
         row.appendChild(checkbox);
 
         const wrap = document.createElement('div');
-        wrap.className = 'flex flex-col flex-1';
+        wrap.className = 'flex flex-col flex-1 min-w-0'; // Thêm min-w-0 để đảm bảo nội dung không tràn
 
         const t = document.createElement('div');
         t.className = 'text-gray-800 font-medium truncate';
         t.textContent = ch.title;
 
         const u = document.createElement('a');
-        u.className = 'text-xs text-blue-600 hover:underline break-all';
+        u.className = 'text-xs text-blue-600 hover:underline break-words'; // Đổi break-all thành break-words
         u.href = ch.url; u.target = '_blank'; u.rel = 'noopener';
         u.textContent = ch.url;
 
