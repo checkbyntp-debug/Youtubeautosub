@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YouTube Auto Sub</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2C8Vj0/mF7T0E5/q8yK4n4wWJb+h8M8g+wA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body {
@@ -44,6 +45,12 @@
     @keyframes spinner {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    .btn-with-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px; /* Khoảng cách giữa icon và text */
     }
   </style>
   <!-- Google Identity Services (OAuth) -->
@@ -140,9 +147,18 @@
 
     <!-- Action Buttons -->
     <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <button id="login-button" class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Đăng nhập YouTube</button>
-      <button id="list-channels-button" class="px-5 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Danh sách kênh</button>
-      <button id="subscribe-selected-button" class="px-5 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-md hover:bg-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Đăng ký kênh</button>
+      <button id="login-button" class="btn-with-icon px-5 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">
+        <i class="fab fa-youtube"></i>
+        <span>Đăng nhập YouTube</span>
+      </button>
+      <button id="list-channels-button" class="btn-with-icon px-5 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>
+        <i class="fas fa-list"></i>
+        <span>Danh sách kênh</span>
+      </button>
+      <button id="subscribe-selected-button" class="btn-with-icon px-5 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-md hover:bg-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>
+        <i class="fas fa-user-plus"></i>
+        <span>Đăng ký kênh</span>
+      </button>
     </div>
 
     <!-- Status & Error Messages -->
@@ -168,9 +184,11 @@
     
     <!-- Unsubscribe Button (Initially Hidden) -->
     <div class="mt-4 text-center hidden" id="unsubscribe-button-container">
-      <button id="unsubscribe-button" class="px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Hủy Đăng Ký</button>
+      <button id="unsubscribe-button" class="btn-with-icon px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>
+        <i class="fas fa-user-minus"></i>
+        <span>Hủy Đăng Ký</span>
+      </button>
     </div>
-
 
     <!-- Privacy Policy Link -->
     <div class="mt-10 text-center">
