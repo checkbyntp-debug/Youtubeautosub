@@ -141,7 +141,7 @@
     <!-- Action Buttons -->
     <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
       <button id="login-button" class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Đăng nhập YouTube</button>
-      <button id="open-selected-button" class="px-5 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-700 transition transform hover:scale-105">Mở Kênh Đã Chọn</button>
+      <button id="unsubscribe-button" class="px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Hủy Đăng Ký</button>
       <button id="subscribe-selected-button" class="px-5 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-md hover:bg-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Đăng ký kênh</button>
     </div>
 
@@ -183,7 +183,7 @@
     const loadingSpinner = document.getElementById('loading-spinner');
     const errorMessage = document.getElementById('error-message');
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
-    const openSelectedButton = document.getElementById('open-selected-button');
+    const unsubscribeButton = document.getElementById('unsubscribe-button');
     const subscribeSelectedButton = document.getElementById('subscribe-selected-button');
     const loginButton = document.getElementById('login-button');
     const authStatus = document.getElementById('auth-status');
@@ -239,13 +239,17 @@
 
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '664290716183-7frfubmiov6gcv811nhsmduqiko21bds.apps.googleusercontent.com', // TODO: thay bằng Client ID của anh
-        scope: 'https://www.googleapis.com/auth/youtube',
+        scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube',
         prompt: '', // lần đầu vẫn hiện consent
         callback: (resp) => {
           if (resp && resp.access_token) {
             accessToken = resp.access_token;
             authStatus.innerHTML = '<span class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full animate-pulse">Đã đăng nhập thành công!</span>';
+            // Enable all buttons when logged in
             subscribeSelectedButton.disabled = false;
+            unsubscribeButton.disabled = false;
+            // Now, fetch the user's subscriptions
+            fetchUserSubscriptions();
           } else {
             authStatus.textContent = 'Không lấy được token. Thử lại.';
           }
@@ -258,6 +262,59 @@
     }
 
     loginButton.addEventListener('click', () => requestToken());
+
+    // New function to fetch user's subscriptions
+    async function fetchUserSubscriptions() {
+        errorMessage.classList.add('hidden');
+        channelListContainer.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
+        channelList.innerHTML = '';
+        selectAllCheckbox.checked = false;
+        
+        try {
+            const subscriptions = await listUserSubscriptions();
+            channelsCache = subscriptions.map(sub => ({
+                id: sub.id,
+                title: sub.snippet.title,
+                channelId: sub.snippet.resourceId.channelId
+            }));
+
+            if (channelsCache.length > 0) {
+                loadingSpinner.classList.add('hidden');
+                channelListContainer.classList.remove('hidden');
+                displayChannels(channelsCache);
+            } else {
+                loadingSpinner.classList.add('hidden');
+                showError('Tài khoản này không đăng ký kênh nào.');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách kênh:', error);
+            loadingSpinner.classList.add('hidden');
+            showError('Lỗi khi tải danh sách kênh. Vui lòng thử lại.');
+        }
+    }
+
+    // New function to list user subscriptions from YouTube API
+    async function listUserSubscriptions() {
+        let allSubscriptions = [];
+        let nextPageToken = '';
+        
+        do {
+            const url = `https://youtube.googleapis.com/youtube/v3/subscriptions?part=snippet&maxResults=50&mine=true&pageToken=${nextPageToken}`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(()=>null);
+                throw new Error(err?.error?.message || `YouTube GET failed ${res.status}`);
+            }
+            const data = await res.json();
+            allSubscriptions = allSubscriptions.concat(data.items);
+            nextPageToken = data.nextPageToken;
+        } while (nextPageToken);
+        
+        return allSubscriptions;
+    }
 
     // ========= File input events =========
     fileInputArea.addEventListener('click', () => fileInput.click());
@@ -280,17 +337,32 @@
       checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
     });
 
-    // ========= Open selected (UI route) =========
-    openSelectedButton.addEventListener('click', () => {
-      const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]:checked');
-      if (checkboxes.length === 0) return showError('Vui lòng chọn ít nhất một kênh để mở.');
-      checkboxes.forEach(checkbox => {
-        const raw = checkbox.dataset.url;
-        if (raw) {
-          const u = buildSubscribeUrl(raw);
-          window.open(u, '_blank', 'noopener');
+    // ========= Unsubscribe selected (API route) =========
+    unsubscribeButton.addEventListener('click', async () => {
+        errorMessage.classList.add('hidden');
+        progress.textContent = '';
+        if (!accessToken) return showError('Vui lòng bấm “Đăng nhập YouTube” trước.');
+
+        const checks = Array.from(document.querySelectorAll('#channel-list input[type="checkbox"]:checked'));
+        if (checks.length === 0) return showError('Vui lòng chọn ít nhất một kênh để hủy đăng ký.');
+
+        let okCount = 0, failCount = 0;
+        for (let i = 0; i < checks.length; i++) {
+            const { id, title } = JSON.parse(checks[i].dataset.payload);
+            progress.textContent = `(${i+1}/${checks.length}) Đang hủy đăng ký: ${title}...`;
+            try {
+                await unsubscribeChannel(id);
+                okCount++;
+            } catch (err) {
+                console.error('Unsubscribe failed for', title, err);
+                failCount++;
+            }
         }
-      });
+        progress.textContent = `Hoàn tất: ${okCount} thành công, ${failCount} thất bại.`;
+        if (failCount > 0) showError('Một số kênh hủy đăng ký thất bại. Xem console để biết chi tiết.');
+
+        // Refresh the list after unsubscribing
+        fetchUserSubscriptions();
     });
 
     // ========= Subscribe selected (API route) =========
@@ -401,7 +473,6 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'mr-3 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded';
-        checkbox.dataset.url = ch.url;
         checkbox.dataset.payload = JSON.stringify(ch);
         row.appendChild(checkbox);
 
@@ -412,11 +483,15 @@
         t.className = 'text-gray-800 font-medium truncate';
         t.textContent = ch.title;
 
-        const u = document.createElement('a');
-        u.className = 'text-xs text-blue-600 hover:underline break-words';
-        u.href = ch.url; u.target = '_blank'; u.rel = 'noopener';
-        u.textContent = ch.url;
-
+        // Display URL or channel ID as link (depending on the source)
+        const u = document.createElement('span');
+        u.className = 'text-xs text-gray-500 break-words';
+        if (ch.url) {
+             u.textContent = ch.url;
+        } else {
+             u.textContent = `ID: ${ch.channelId}`;
+        }
+        
         wrap.appendChild(t);
         wrap.appendChild(u);
         row.appendChild(wrap);
@@ -427,21 +502,6 @@
     function showError(msg) {
       errorMessage.textContent = msg;
       errorMessage.classList.remove('hidden');
-    }
-
-    // Build URL mở tab với popup confirm (nếu phù hợp)
-    function buildSubscribeUrl(raw) {
-      try {
-        const u = new URL(raw);
-        if (u.hostname === 'm.youtube.com' || u.hostname === 'youtube.com') u.hostname = 'www.youtube.com';
-        if (!u.searchParams.has('sub_confirmation')) u.searchParams.set('sub_confirmation', '1');
-        u.searchParams.set('app', 'desktop');
-        u.searchParams.set('persist_app', '1');
-        return u.toString();
-      } catch {
-        const sep = raw.includes('?') ? '&' : '?';
-        return `${raw}${sep}sub_confirmation=1&app=desktop&persist_app=1`;
-      }
     }
 
     // ========= YouTube API helpers =========
@@ -523,6 +583,21 @@
         throw new Error(err?.error?.message || `Subscribe failed ${res.status}`);
       }
       return true;
+    }
+
+    // New function to handle unsubscription
+    async function unsubscribeChannel(subscriptionId) {
+        const res = await fetch(`https://youtube.googleapis.com/youtube/v3/subscriptions?id=${subscriptionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(()=>null);
+            throw new Error(err?.error?.message || `Unsubscribe failed ${res.status}`);
+        }
+        return true;
     }
   </script>
 </body>
