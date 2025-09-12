@@ -141,7 +141,7 @@
     <!-- Action Buttons -->
     <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
       <button id="login-button" class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition transform hover:scale-105">Đăng nhập YouTube</button>
-      <button id="unsubscribe-button" class="px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Hủy Đăng Ký</button>
+      <button id="list-channels-button" class="px-5 py-3 bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Danh sách kênh</button>
       <button id="subscribe-selected-button" class="px-5 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-md hover:bg-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Đăng ký kênh</button>
     </div>
 
@@ -165,6 +165,12 @@
       <div id="channel-list" class="space-y-3"></div>
       <div id="progress" class="mt-4 text-sm text-gray-600"></div>
     </div>
+    
+    <!-- Unsubscribe Button (Initially Hidden) -->
+    <div class="mt-4 text-center hidden" id="unsubscribe-button-container">
+      <button id="unsubscribe-button" class="px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>Hủy Đăng Ký</button>
+    </div>
+
 
     <!-- Privacy Policy Link -->
     <div class="mt-10 text-center">
@@ -184,6 +190,7 @@
     const errorMessage = document.getElementById('error-message');
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const unsubscribeButton = document.getElementById('unsubscribe-button');
+    const unsubscribeButtonContainer = document.getElementById('unsubscribe-button-container');
     const subscribeSelectedButton = document.getElementById('subscribe-selected-button');
     const loginButton = document.getElementById('login-button');
     const authStatus = document.getElementById('auth-status');
@@ -195,7 +202,7 @@
     const handleWarningLink = document.getElementById('handle-warning-link');
     const welcomeModal = document.getElementById('welcome-modal');
     const closeWelcomeModalButton = document.getElementById('close-welcome-modal');
-
+    const listChannelsButton = document.getElementById('list-channels-button');
 
     // Add event listeners for the welcome modal
     closeWelcomeModalButton.addEventListener('click', () => {
@@ -246,10 +253,8 @@
             accessToken = resp.access_token;
             authStatus.innerHTML = '<span class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full animate-pulse">Đã đăng nhập thành công!</span>';
             // Enable all buttons when logged in
+            listChannelsButton.disabled = false;
             subscribeSelectedButton.disabled = false;
-            unsubscribeButton.disabled = false;
-            // Now, fetch the user's subscriptions
-            fetchUserSubscriptions();
           } else {
             authStatus.textContent = 'Không lấy được token. Thử lại.';
           }
@@ -262,6 +267,15 @@
     }
 
     loginButton.addEventListener('click', () => requestToken());
+    
+    // New button for listing channels
+    listChannelsButton.addEventListener('click', () => {
+        if (!accessToken) {
+            showError('Vui lòng bấm “Đăng nhập YouTube” trước.');
+            return;
+        }
+        fetchUserSubscriptions();
+    });
 
     // New function to fetch user's subscriptions
     async function fetchUserSubscriptions() {
@@ -270,6 +284,7 @@
         loadingSpinner.classList.remove('hidden');
         channelList.innerHTML = '';
         selectAllCheckbox.checked = false;
+        unsubscribeButtonContainer.classList.add('hidden');
         
         try {
             const subscriptions = await listUserSubscriptions();
@@ -283,6 +298,9 @@
                 loadingSpinner.classList.add('hidden');
                 channelListContainer.classList.remove('hidden');
                 displayChannels(channelsCache);
+                // Hide list channels button, show unsubscribe button
+                listChannelsButton.classList.add('hidden');
+                unsubscribeButtonContainer.classList.remove('hidden');
             } else {
                 loadingSpinner.classList.add('hidden');
                 showError('Tài khoản này không đăng ký kênh nào.');
@@ -335,7 +353,22 @@
     selectAllCheckbox.addEventListener('change', (event) => {
       const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]');
       checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
+      checkIfAnyCheckboxIsChecked();
     });
+
+    // Add event listener to each checkbox to show/hide unsubscribe button
+    channelList.addEventListener('change', (event) => {
+        if (event.target.type === 'checkbox') {
+            checkIfAnyCheckboxIsChecked();
+        }
+    });
+
+    function checkIfAnyCheckboxIsChecked() {
+        const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]');
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        unsubscribeButton.disabled = !anyChecked;
+    }
+
 
     // ========= Unsubscribe selected (API route) =========
     unsubscribeButton.addEventListener('click', async () => {
@@ -497,6 +530,10 @@
         row.appendChild(wrap);
         channelList.appendChild(row);
       });
+      // Re-attach event listeners after rendering new elements
+      const checkboxes = document.querySelectorAll('#channel-list input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.addEventListener('change', checkIfAnyCheckboxIsChecked));
+      checkIfAnyCheckboxIsChecked();
     }
 
     function showError(msg) {
