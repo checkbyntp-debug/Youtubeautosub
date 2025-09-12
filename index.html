@@ -64,7 +64,7 @@
   </div>
 
   <!-- Welcome Modal -->
-  <div id="welcome-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+  <div id="welcome-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
     <div class="modal-content bg-white rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-8 relative custom-shadow flex flex-col items-center text-center">
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Chào mừng bạn!</h2>
       <div class="text-center mb-6">
@@ -85,7 +85,7 @@
   </button>
 
   <!-- Help Modal -->
-  <div id="help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+  <div id="help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
     <div class="modal-content bg-white rounded-3xl w-full max-w-xs sm:max-w-md p-4 sm:p-6 relative custom-shadow">
       
       <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Hướng dẫn sử dụng</h2>
@@ -183,7 +183,7 @@
     </div>
     
     <!-- Unsubscribe Button (Initially Hidden) -->
-    <div class="mt-4 text-center hidden" id="unsubscribe-button-container">
+    <div class="mt-4 flex justify-center hidden" id="unsubscribe-button-container">
       <button id="unsubscribe-button" class="btn-with-icon px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition transform hover:scale-105 disabled:opacity-50 disabled:pointer-events-none" disabled>
         <i class="fas fa-user-minus"></i>
         <span>Hủy Đăng Ký</span>
@@ -224,16 +224,16 @@
 
     // Add event listeners for the welcome modal
     closeWelcomeModalButton.addEventListener('click', () => {
-      welcomeModal.classList.add('hidden');
+      welcomeModal.classList.add('opacity-0', 'pointer-events-none');
     });
 
     // Add event listeners for the help modal
     helpButton.addEventListener('click', () => {
-      helpModal.classList.remove('hidden');
+      helpModal.classList.remove('opacity-0', 'pointer-events-none');
     });
 
     closeModalButton.addEventListener('click', () => {
-      helpModal.classList.add('hidden');
+      helpModal.classList.add('opacity-0', 'pointer-events-none');
     });
 
     // You can replace '#' with actual URLs here
@@ -259,7 +259,7 @@
       const preloader = document.getElementById('preloader');
       setTimeout(() => {
           preloader.style.display = 'none';
-          welcomeModal.classList.remove('hidden');
+          welcomeModal.classList.remove('opacity-0', 'pointer-events-none');
       }, 2000); // Wait for 2 seconds before fading out preloader
 
       tokenClient = google.accounts.oauth2.initTokenClient({
