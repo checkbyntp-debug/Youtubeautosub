@@ -286,6 +286,9 @@
         selectAllCheckbox.checked = false;
         unsubscribeButtonContainer.classList.add('hidden');
         
+        // Disable the list button while fetching
+        listChannelsButton.disabled = true;
+
         try {
             const subscriptions = await listUserSubscriptions();
             channelsCache = subscriptions.map(sub => ({
@@ -298,8 +301,7 @@
                 loadingSpinner.classList.add('hidden');
                 channelListContainer.classList.remove('hidden');
                 displayChannels(channelsCache);
-                // Hide list channels button, show unsubscribe button
-                listChannelsButton.classList.add('hidden');
+                // Now show the unsubscribe button
                 unsubscribeButtonContainer.classList.remove('hidden');
             } else {
                 loadingSpinner.classList.add('hidden');
